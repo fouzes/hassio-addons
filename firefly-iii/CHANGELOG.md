@@ -3,6 +3,10 @@
 This add-on follows its own [semantic versioning](https://semver.org/),
 independent of the Firefly III version it bundles.
 
+## 0.1.5
+
+- Fix PHP-FPM failing with `failed to open error_log (/proc/self/fd/2): Permission denied`.
+
 ## 0.1.4
 
 - Add Home Assistant ingress so Firefly III appears in the sidebar menu.

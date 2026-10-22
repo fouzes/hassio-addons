@@ -63,7 +63,10 @@ fi
 
 chown -R www-data:www-data "$STORAGE"
 
-# Upstream runs as www-data; drop root now that /data is prepared.
+# Upstream runs as www-data; drop root now that /data is prepared. runc
+# normally hands stdio to the container user, which PHP-FPM needs to reopen
+# /proc/self/fd/2, so do the same here.
+chown www-data:www-data /proc/self/fd/1 /proc/self/fd/2 2>/dev/null || true
 export HOME=/var/www
 exec setpriv --reuid=www-data --regid=www-data --init-groups \
     docker-php-serversideup-entrypoint "$@"
