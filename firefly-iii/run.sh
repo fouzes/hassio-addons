@@ -10,8 +10,13 @@ opt() { jq -r "$1 // empty" "$OPTIONS"; }
 STORAGE=/data/storage
 mkdir -p "$STORAGE"/{app,database,export,logs,upload} \
          "$STORAGE"/framework/{cache/data,sessions,views}
-rm -rf /var/www/html/storage
-ln -s "$STORAGE" /var/www/html/storage
+# The upstream image declares storage/upload as a VOLUME, so it is a mount
+# point and cannot be removed. Move the whole directory aside instead and
+# point storage at /data.
+if [ ! -L /var/www/html/storage ]; then
+    mv /var/www/html/storage /var/www/html/storage.orig
+fi
+ln -sfn "$STORAGE" /var/www/html/storage
 
 # --- Application key (generated once, then reused) ----------------------
 APP_KEY="$(opt .app_key)"
@@ -29,7 +34,10 @@ export APP_KEY
 export SITE_OWNER="$(opt .site_owner)"
 export TZ="$(opt .timezone)"
 export DEFAULT_LANGUAGE="$(opt .default_language)"
+# Ingress requests arrive from the Supervisor proxy, so trust it by default.
 export TRUSTED_PROXIES="$(opt .trusted_proxies)"
+: "${TRUSTED_PROXIES:=**}"
+export TRUSTED_PROXIES
 export LOG_LEVEL="$(opt .log_level)"
 export APP_ENV=production
 export LOG_CHANNEL=stack

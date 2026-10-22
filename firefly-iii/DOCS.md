@@ -5,7 +5,7 @@
 1. Add this repository to the Home Assistant add-on store.
 2. Install the **Firefly III** add-on.
 3. Review the configuration, then start the add-on.
-4. Open `http://<home-assistant-host>:8080` and register the first user.
+4. Open Firefly III from the sidebar (or `http://<home-assistant-host>:8080`) and register the first user.
 
 ## Configuration
 
