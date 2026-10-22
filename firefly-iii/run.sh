@@ -8,15 +8,18 @@ opt() { jq -r "$1 // empty" "$OPTIONS"; }
 
 # --- Persistent storage -------------------------------------------------
 STORAGE=/data/storage
-mkdir -p "$STORAGE"/{app,database,export,logs,upload} \
+mkdir -p "$STORAGE"/{app,build,database,debugbar,export,logs,upload} \
          "$STORAGE"/framework/{cache/data,sessions,views}
-# The upstream image declares storage/upload as a VOLUME, so it is a mount
-# point and cannot be removed. Move the whole directory aside instead and
-# point storage at /data.
-if [ ! -L /var/www/html/storage ]; then
-    mv /var/www/html/storage /var/www/html/storage.orig
-fi
-ln -sfn "$STORAGE" /var/www/html/storage
+# The upstream image keeps storage/upload as a VOLUME mount point, which cannot
+# be replaced, so link every other entry and point the upload disk at /data.
+for name in app build database debugbar export framework logs; do
+    rm -rf "/var/www/html/storage/$name"
+    ln -s "$STORAGE/$name" "/var/www/html/storage/$name"
+done
+for name in oauth-private.key oauth-public.key; do
+    ln -sf "$STORAGE/$name" "/var/www/html/storage/$name"
+done
+export UPLOAD_PATH="$STORAGE/upload"
 
 # --- Application key (generated once, then reused) ----------------------
 APP_KEY="$(opt .app_key)"
@@ -60,4 +63,7 @@ fi
 
 chown -R www-data:www-data "$STORAGE"
 
-exec /usr/local/bin/entrypoint.sh "$@"
+# Upstream runs as www-data; drop root now that /data is prepared.
+export HOME=/var/www
+exec setpriv --reuid=www-data --regid=www-data --init-groups \
+    docker-php-serversideup-entrypoint "$@"
