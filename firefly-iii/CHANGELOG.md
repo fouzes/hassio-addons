@@ -3,7 +3,7 @@
 This add-on follows its own [semantic versioning](https://semver.org/),
 independent of the Firefly III version it bundles.
 
-## 0.1.3
+## 0.1.4
 
 - Add Home Assistant ingress so Firefly III appears in the sidebar menu.
 - Fix start-up failure `rm: cannot remove '/var/www/html/storage/upload': Device or resource busy`.
