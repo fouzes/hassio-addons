@@ -3,6 +3,14 @@
 This add-on follows its own [semantic versioning](https://semver.org/),
 independent of the Firefly III version it bundles.
 
+## 0.1.2
+
+- Install from a prebuilt image on GitHub Container Registry instead of building on the device.
+
+## 0.1.1
+
+- Fix image build failing with `apt-get ... Permission denied` by building as root.
+
 ## 0.1.0
 
 - Initial release of the Firefly III add-on.
