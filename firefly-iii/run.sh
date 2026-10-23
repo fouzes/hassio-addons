@@ -42,6 +42,9 @@ export TRUSTED_PROXIES="$(opt .trusted_proxies)"
 : "${TRUSTED_PROXIES:=**}"
 export TRUSTED_PROXIES
 export LOG_LEVEL="$(opt .log_level)"
+# Ingress shows the UI in an iframe; Firefly III's own "X-Frame-Options: deny"
+# would block it (nginx still sends SAMEORIGIN).
+export DISABLE_FRAME_HEADER=true
 export APP_ENV=production
 export LOG_CHANNEL=stack
 export APP_LOG_LEVEL="$LOG_LEVEL"

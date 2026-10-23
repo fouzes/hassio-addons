@@ -3,6 +3,10 @@
 This add-on follows its own [semantic versioning](https://semver.org/),
 independent of the Firefly III version it bundles.
 
+## 0.1.8
+
+- Fix "refused to connect" in the sidebar panel by disabling Firefly III's `X-Frame-Options: deny` header.
+
 ## 0.1.7
 
 - Fix `addon-log.fifo: Permission denied` by creating the log FIFO in `/run`, root-owned and world-writable.
