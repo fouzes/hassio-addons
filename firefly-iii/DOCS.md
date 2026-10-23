@@ -11,7 +11,6 @@
 
 | Option | Description |
 | --- | --- |
-| `site_owner` | Contact e-mail address of the site owner. |
 | `timezone` | IANA time zone, e.g. `Europe/Amsterdam`. |
 | `default_language` | Default locale, e.g. `en_US`. |
 | `app_key` | Optional 32-character application key (or `base64:...`). If empty, a key is generated once and stored in the add-on data. |

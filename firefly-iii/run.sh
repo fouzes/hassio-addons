@@ -34,7 +34,6 @@ fi
 export APP_KEY
 
 # --- General settings ---------------------------------------------------
-export SITE_OWNER="$(opt .site_owner)"
 export TZ="$(opt .timezone)"
 export DEFAULT_LANGUAGE="$(opt .default_language)"
 # Requests only ever arrive through the ingress proxy (nginx refuses others).

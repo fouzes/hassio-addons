@@ -1,7 +1,4 @@
 configuration:
-  site_owner:
-    name: Site owner e-mail
-    description: Contact address shown on error pages and used for the first user.
   timezone:
     name: Time zone
     description: IANA time zone name, for example Europe/Amsterdam.
