@@ -5,7 +5,7 @@
 1. Add this repository to the Home Assistant add-on store.
 2. Install the **Firefly III** add-on.
 3. Review the configuration, then start the add-on.
-4. Open Firefly III from the sidebar (or `http://<home-assistant-host>:8080`) and register the first user.
+4. Open Firefly III from the sidebar and register the first user.
 
 ## Configuration
 
@@ -21,6 +21,14 @@
 | `database.type` | `sqlite` (default) or `mysql`. |
 | `database.host`, `.port`, `.name`, `.username`, `.password` | Connection settings, used only when `type` is `mysql`. |
 
+### Direct access on port 8080
+
+The port is not published by default, so Firefly III is reachable only through
+Home Assistant (ingress). To also use it directly, set a host port for
+`8080/tcp` on the add-on's Network tab. Mobile apps and the Data Importer need
+this. With `auth_mode: ha_user` direct connections are refused even if the port
+is published.
+
 ### Signing in with your Home Assistant user
 
 With `auth_mode: ha_user` Firefly III trusts the user that Home Assistant
@@ -28,10 +36,10 @@ passes through ingress, so there is no login page. The Home Assistant user name
 becomes the Firefly III account `<name>@homeassistant.local`, created on first
 visit; the first account created becomes the owner.
 
-- Open Firefly III from the sidebar. The direct port (8080) is refused in this
-  mode, because otherwise anyone on your network could forge the user header.
-  Clients that talk to the port directly (mobile apps, the Data Importer) will
-  not work.
+- Open Firefly III from the sidebar. Direct connections to port 8080 are
+  refused in this mode, because otherwise anyone on your network could forge
+  the user header. Clients that talk to the port directly (mobile apps, the
+  Data Importer) will not work.
 - Every Home Assistant user who can open the ingress URL gets their own Firefly
   III account with separate data. `panel_admin` only hides the sidebar entry
   from non-admins, it does not block the URL.
