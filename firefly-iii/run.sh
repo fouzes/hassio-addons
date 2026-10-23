@@ -37,10 +37,8 @@ export APP_KEY
 export SITE_OWNER="$(opt .site_owner)"
 export TZ="$(opt .timezone)"
 export DEFAULT_LANGUAGE="$(opt .default_language)"
-# Ingress requests arrive from the Supervisor proxy, so trust it by default.
-export TRUSTED_PROXIES="$(opt .trusted_proxies)"
-: "${TRUSTED_PROXIES:=**}"
-export TRUSTED_PROXIES
+# Requests only ever arrive through the ingress proxy (nginx refuses others).
+export TRUSTED_PROXIES='**'
 export LOG_LEVEL="$(opt .log_level)"
 # Ingress shows the UI in an iframe; Firefly III's own "X-Frame-Options: deny"
 # would block it (nginx still sends SAMEORIGIN).
@@ -50,41 +48,15 @@ export LOG_CHANNEL=stack
 export APP_LOG_LEVEL="$LOG_LEVEL"
 
 # --- Authentication -----------------------------------------------------
-# ha_user: trust the Home Assistant user that ingress passes along and only
-# accept connections from the ingress proxy, so the header cannot be forged.
-AUTH_MODE="$(opt .auth_mode)"
-if [ "$AUTH_MODE" = "ha_user" ]; then
-    export AUTHENTICATION_GUARD=remote_user_guard
-    export AUTHENTICATION_GUARD_HEADER=REMOTE_USER
-    cat > /etc/nginx/addon-access.conf <<'NGINX'
-allow 172.30.32.2;
-allow 127.0.0.1;
-allow ::1;
-deny all;
-NGINX
-    cat > /etc/nginx/addon-auth.conf <<'NGINX'
-if ($http_x_remote_user_name = "") { return 403; }
-fastcgi_param REMOTE_USER "$http_x_remote_user_name@homeassistant.local";
-NGINX
-else
-    : > /etc/nginx/addon-access.conf
-    : > /etc/nginx/addon-auth.conf
-fi
+# Firefly III trusts the Home Assistant user that ingress passes along; nginx
+# only accepts the ingress proxy so the header cannot be forged.
+export AUTHENTICATION_GUARD=remote_user_guard
+export AUTHENTICATION_GUARD_HEADER=REMOTE_USER
 
 # --- Database -----------------------------------------------------------
-DB_TYPE="$(opt .database.type)"
-if [ "$DB_TYPE" = "mysql" ]; then
-    export DB_CONNECTION=mysql
-    export DB_HOST="$(opt .database.host)"
-    export DB_PORT="$(opt .database.port)"
-    export DB_DATABASE="$(opt .database.name)"
-    export DB_USERNAME="$(opt .database.username)"
-    export DB_PASSWORD="$(opt .database.password)"
-else
-    export DB_CONNECTION=sqlite
-    export DB_DATABASE="$STORAGE/database/database.sqlite"
-    touch "$DB_DATABASE"
-fi
+export DB_CONNECTION=sqlite
+export DB_DATABASE="$STORAGE/database/database.sqlite"
+touch "$DB_DATABASE"
 
 chown -R www-data:www-data "$STORAGE"
 

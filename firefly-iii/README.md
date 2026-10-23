@@ -9,7 +9,8 @@ This add-on runs the official Firefly III image inside Home Assistant.
 ## Features
 
 - Persistent storage and an auto-generated application key
-- Built-in SQLite database, or an external MySQL/MariaDB server
-- Configurable time zone, language and trusted proxies
+- Built-in SQLite database
+- Signs you in automatically as your Home Assistant user (via ingress)
+- Configurable time zone and language
 
 See the **Documentation** tab for setup instructions.

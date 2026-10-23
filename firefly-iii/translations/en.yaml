@@ -1,7 +1,4 @@
 configuration:
-  auth_mode:
-    name: Authentication
-    description: "builtin: Firefly III login page. ha_user: sign in automatically as your Home Assistant user (ingress only; the direct port is blocked)."
   site_owner:
     name: Site owner e-mail
     description: Contact address shown on error pages and used for the first user.
@@ -11,17 +8,9 @@ configuration:
   default_language:
     name: Default language
     description: Locale used for new users, for example en_US.
-  trusted_proxies:
-    name: Trusted proxies
-    description: Comma-separated proxy IPs, or "**" to trust all. Needed when running behind a reverse proxy.
   app_key:
     name: Application key
     description: Optional. Leave empty to generate and persist a key automatically.
   log_level:
     name: Log level
     description: Verbosity of the Firefly III log.
-  database:
-    name: Database
-    description: Use the built-in SQLite database or an external MySQL/MariaDB server.
-network:
-  8080/tcp: Firefly III web interface

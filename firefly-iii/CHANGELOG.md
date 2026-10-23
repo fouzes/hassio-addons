@@ -3,6 +3,12 @@
 This add-on follows its own [semantic versioning](https://semver.org/),
 independent of the Firefly III version it bundles.
 
+## 0.3.0
+
+- Always sign in as the Home Assistant user and only accept the ingress proxy; remove the `auth_mode` option.
+- Remove the `trusted_proxies` and `database` options. The built-in SQLite database is always used.
+- Remove the `8080/tcp` port; Firefly III is only reachable through Home Assistant.
+
 ## 0.2.1
 
 - Do not publish port 8080 by default, so Firefly III is only reachable through Home Assistant. Enable it on the Network tab if you need direct access.

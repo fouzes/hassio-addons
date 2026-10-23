@@ -1,5 +1,5 @@
 name: Firefly III
-version: "0.2.1"
+version: "0.3.0"
 slug: firefly_iii
 image: ghcr.io/fouzes/{arch}-addon-firefly-iii
 description: Self-hosted personal finance manager
@@ -13,38 +13,16 @@ ingress_port: 8080
 panel_icon: mdi:cash-multiple
 panel_title: Firefly III
 startup: services
-ports:
-  8080/tcp: null
-ports_description:
-  8080/tcp: Firefly III web interface
 map:
   - addon_config:rw
 options:
-  auth_mode: builtin
   site_owner: admin@example.com
   timezone: UTC
   default_language: en_US
-  trusted_proxies: ""
   log_level: notice
-  database:
-    type: sqlite
-    host: core-mariadb
-    port: 3306
-    name: firefly
-    username: firefly
-    password: ""
 schema:
-  auth_mode: list(builtin|ha_user)
   site_owner: email
   timezone: str
   default_language: str
-  trusted_proxies: str?
   app_key: password?
   log_level: list(debug|info|notice|warning|error|critical)
-  database:
-    type: list(sqlite|mysql)
-    host: str
-    port: port
-    name: str
-    username: str
-    password: password?

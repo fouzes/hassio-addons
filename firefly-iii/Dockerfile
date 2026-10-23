@@ -29,11 +29,16 @@ RUN sed -e 's#\$NGINX_WEBROOT#/var/www/html/public#' \
     && grep -q addon-auth.conf /etc/nginx/site-opts.d/http.conf \
     && ! grep -q '\$[A-Z_]\+' /etc/nginx/site-opts.d/http.conf
 
-# run.sh fills these in at start-up depending on the auth_mode option. The
-# upstream real-IP config trusts a client-supplied CF-Connecting-IP header from
-# private networks, which would let LAN clients fake the ingress address, so
-# neutralise it.
-RUN touch /etc/nginx/addon-access.conf /etc/nginx/addon-auth.conf \
+# Only the Home Assistant ingress proxy may connect, and the user it passes in
+# X-Remote-User-Name becomes the Firefly III user. The upstream real-IP config
+# trusts a client-supplied CF-Connecting-IP header from private networks, which
+# would let LAN clients fake the ingress address, so neutralise it.
+RUN printf '%s\n' 'allow 172.30.32.2;' 'allow 127.0.0.1;' 'allow ::1;' 'deny all;' \
+        > /etc/nginx/addon-access.conf \
+    && printf '%s\n' \
+        'if ($http_x_remote_user_name = "") { return 403; }' \
+        'fastcgi_param REMOTE_USER "$http_x_remote_user_name@homeassistant.local";' \
+        > /etc/nginx/addon-auth.conf \
     && echo '# disabled by the Home Assistant add-on' > /etc/nginx/server-opts.d/remoteip.conf
 
 # storage/upload is a VOLUME in the upstream image and cannot be replaced, so
