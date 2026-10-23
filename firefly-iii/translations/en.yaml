@@ -1,4 +1,7 @@
 configuration:
+  auth_mode:
+    name: Authentication
+    description: "builtin: Firefly III login page. ha_user: sign in automatically as your Home Assistant user (ingress only; the direct port is blocked)."
   site_owner:
     name: Site owner e-mail
     description: Contact address shown on error pages and used for the first user.

@@ -49,6 +49,28 @@ export APP_ENV=production
 export LOG_CHANNEL=stack
 export APP_LOG_LEVEL="$LOG_LEVEL"
 
+# --- Authentication -----------------------------------------------------
+# ha_user: trust the Home Assistant user that ingress passes along and only
+# accept connections from the ingress proxy, so the header cannot be forged.
+AUTH_MODE="$(opt .auth_mode)"
+if [ "$AUTH_MODE" = "ha_user" ]; then
+    export AUTHENTICATION_GUARD=remote_user_guard
+    export AUTHENTICATION_GUARD_HEADER=REMOTE_USER
+    cat > /etc/nginx/addon-access.conf <<'NGINX'
+allow 172.30.32.2;
+allow 127.0.0.1;
+allow ::1;
+deny all;
+NGINX
+    cat > /etc/nginx/addon-auth.conf <<'NGINX'
+if ($http_x_remote_user_name = "") { return 403; }
+fastcgi_param REMOTE_USER "$http_x_remote_user_name@homeassistant.local";
+NGINX
+else
+    : > /etc/nginx/addon-access.conf
+    : > /etc/nginx/addon-auth.conf
+fi
+
 # --- Database -----------------------------------------------------------
 DB_TYPE="$(opt .database.type)"
 if [ "$DB_TYPE" = "mysql" ]; then

@@ -1,5 +1,5 @@
 name: Firefly III
-version: "0.1.8"
+version: "0.2.0"
 slug: firefly_iii
 image: ghcr.io/fouzes/{arch}-addon-firefly-iii
 description: Self-hosted personal finance manager
@@ -20,6 +20,7 @@ ports_description:
 map:
   - addon_config:rw
 options:
+  auth_mode: builtin
   site_owner: admin@example.com
   timezone: UTC
   default_language: en_US
@@ -33,6 +34,7 @@ options:
     username: firefly
     password: ""
 schema:
+  auth_mode: list(builtin|ha_user)
   site_owner: email
   timezone: str
   default_language: str

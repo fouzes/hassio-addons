@@ -3,6 +3,11 @@
 This add-on follows its own [semantic versioning](https://semver.org/),
 independent of the Firefly III version it bundles.
 
+## 0.2.0
+
+- Add `auth_mode` option. `ha_user` signs in automatically as the Home Assistant user via ingress and only accepts connections from the ingress proxy.
+- Disable the upstream real-IP nginx config so client-supplied headers cannot fake the source address.
+
 ## 0.1.8
 
 - Fix "refused to connect" in the sidebar panel by disabling Firefly III's `X-Frame-Options: deny` header.

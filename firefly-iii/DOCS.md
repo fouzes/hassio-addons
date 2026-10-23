@@ -16,9 +16,27 @@
 | `default_language` | Default locale, e.g. `en_US`. |
 | `trusted_proxies` | Comma-separated proxy IPs, or `**` to trust all. Required behind a reverse proxy. |
 | `app_key` | Optional 32-character application key (or `base64:...`). If empty, a key is generated once and stored in the add-on data. |
+| `auth_mode` | `builtin` (default): Firefly III's own login page. `ha_user`: sign in automatically as your Home Assistant user, see below. |
 | `log_level` | One of `debug`, `info`, `notice`, `warning`, `error`, `critical`. |
 | `database.type` | `sqlite` (default) or `mysql`. |
 | `database.host`, `.port`, `.name`, `.username`, `.password` | Connection settings, used only when `type` is `mysql`. |
+
+### Signing in with your Home Assistant user
+
+With `auth_mode: ha_user` Firefly III trusts the user that Home Assistant
+passes through ingress, so there is no login page. The Home Assistant user name
+becomes the Firefly III account `<name>@homeassistant.local`, created on first
+visit; the first account created becomes the owner.
+
+- Open Firefly III from the sidebar. The direct port (8080) is refused in this
+  mode, because otherwise anyone on your network could forge the user header.
+  Clients that talk to the port directly (mobile apps, the Data Importer) will
+  not work.
+- Every Home Assistant user who can open the ingress URL gets their own Firefly
+  III account with separate data. `panel_admin` only hides the sidebar entry
+  from non-admins, it does not block the URL.
+- An account you already created with a different e-mail address is not
+  reused. Create it as `<ha-user>@homeassistant.local` or start fresh.
 
 ### Using MariaDB
 

@@ -19,10 +19,22 @@ RUN sed -e 's#\$NGINX_WEBROOT#/var/www/html/public#' \
         -e 's#\$PHP_MAX_EXECUTION_TIME#300#' \
         /etc/nginx/site-opts.d/http.conf.template \
         > /etc/nginx/site-opts.d/http.conf \
-    && sed -i '/fastcgi_read_timeout 300;/a\    fastcgi_param  HTTP_X_FORWARDED_PREFIX $http_x_ingress_path;' \
+    && sed -i \
+        -e '/server_name _;/a\    include /etc/nginx/addon-access.conf;' \
+        -e '/fastcgi_read_timeout 300;/a\    fastcgi_param  HTTP_X_FORWARDED_PREFIX $http_x_ingress_path;' \
+        -e '/fastcgi_read_timeout 300;/a\    include /etc/nginx/addon-auth.conf;' \
         /etc/nginx/site-opts.d/http.conf \
     && grep -q HTTP_X_FORWARDED_PREFIX /etc/nginx/site-opts.d/http.conf \
+    && grep -q addon-access.conf /etc/nginx/site-opts.d/http.conf \
+    && grep -q addon-auth.conf /etc/nginx/site-opts.d/http.conf \
     && ! grep -q '\$[A-Z_]\+' /etc/nginx/site-opts.d/http.conf
+
+# run.sh fills these in at start-up depending on the auth_mode option. The
+# upstream real-IP config trusts a client-supplied CF-Connecting-IP header from
+# private networks, which would let LAN clients fake the ingress address, so
+# neutralise it.
+RUN touch /etc/nginx/addon-access.conf /etc/nginx/addon-auth.conf \
+    && echo '# disabled by the Home Assistant add-on' > /etc/nginx/server-opts.d/remoteip.conf
 
 # storage/upload is a VOLUME in the upstream image and cannot be replaced, so
 # let the upload disk root be configured and keep it under /data instead.
