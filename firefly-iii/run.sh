@@ -65,12 +65,13 @@ chown -R www-data:www-data "$STORAGE"
 
 # Upstream runs as www-data; drop root now that /data is prepared. PHP-FPM
 # reopens /proc/self/fd/2 for its log, which fails for www-data when stderr is
-# owned by root. Route all output through a FIFO owned by www-data instead; a
-# root-owned reader forwards it to the real container output.
-LOG_FIFO=/tmp/addon-log.fifo
+# owned by root. Route all output through a world-writable FIFO instead; a
+# root-owned reader forwards it to the real container output. The FIFO stays
+# root-owned because fs.protected_fifos refuses O_CREAT opens of FIFOs owned by
+# another user in sticky directories such as /tmp.
+LOG_FIFO=/run/addon-log.fifo
 rm -f "$LOG_FIFO"
-mkfifo "$LOG_FIFO"
-chown www-data:www-data "$LOG_FIFO"
+mkfifo -m 666 "$LOG_FIFO"
 cat "$LOG_FIFO" &
 
 export HOME=/var/www
