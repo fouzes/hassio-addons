@@ -3,6 +3,10 @@
 This add-on follows its own [semantic versioning](https://semver.org/),
 independent of the Firefly III version it bundles.
 
+## 0.1.6
+
+- Route container output through a FIFO owned by `www-data` so PHP-FPM can open its log (the 0.1.5 `chown` approach did not fix it).
+
 ## 0.1.5
 
 - Fix PHP-FPM failing with `failed to open error_log (/proc/self/fd/2): Permission denied`.

@@ -63,10 +63,16 @@ fi
 
 chown -R www-data:www-data "$STORAGE"
 
-# Upstream runs as www-data; drop root now that /data is prepared. runc
-# normally hands stdio to the container user, which PHP-FPM needs to reopen
-# /proc/self/fd/2, so do the same here.
-chown www-data:www-data /proc/self/fd/1 /proc/self/fd/2 2>/dev/null || true
+# Upstream runs as www-data; drop root now that /data is prepared. PHP-FPM
+# reopens /proc/self/fd/2 for its log, which fails for www-data when stderr is
+# owned by root. Route all output through a FIFO owned by www-data instead; a
+# root-owned reader forwards it to the real container output.
+LOG_FIFO=/tmp/addon-log.fifo
+rm -f "$LOG_FIFO"
+mkfifo "$LOG_FIFO"
+chown www-data:www-data "$LOG_FIFO"
+cat "$LOG_FIFO" &
+
 export HOME=/var/www
 exec setpriv --reuid=www-data --regid=www-data --init-groups \
-    docker-php-serversideup-entrypoint "$@"
+    docker-php-serversideup-entrypoint "$@" >"$LOG_FIFO" 2>&1
