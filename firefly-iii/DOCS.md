@@ -38,7 +38,8 @@ The database is the built-in SQLite database, stored in the add-on data.
 ## Data and backups
 
 All data (database, uploads, logs, application key) is stored in the add-on's
-data directory and is included in Home Assistant backups.
+data directory and is included in Home Assistant backups. Backups stop the
+add-on briefly so the database is consistent.
 
 > **Keep the application key safe.** It encrypts sensitive values. If you set
 > `app_key` manually, do not change it later or existing data becomes unreadable.

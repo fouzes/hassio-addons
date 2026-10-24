@@ -3,6 +3,12 @@
 This add-on follows its own [semantic versioning](https://semver.org/),
 independent of the Firefly III version it bundles.
 
+## 0.4.1
+
+- Stop the add-on while a backup is taken so the SQLite database is consistent.
+- Add a container health check so Home Assistant sees when the web server stops
+  responding.
+
 ## 0.4.0
 
 - Update Firefly III from 6.2.21 to 6.7.9.

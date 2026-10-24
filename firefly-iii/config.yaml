@@ -1,5 +1,5 @@
 name: Firefly III
-version: "0.4.0"
+version: "0.4.1"
 slug: firefly_iii
 image: ghcr.io/fouzes/{arch}-addon-firefly-iii
 description: Self-hosted personal finance manager
@@ -13,6 +13,7 @@ ingress_port: 8080
 panel_icon: mdi:cash-multiple
 panel_title: Firefly III
 startup: services
+backup: cold
 map:
   - addon_config:rw
 options:
