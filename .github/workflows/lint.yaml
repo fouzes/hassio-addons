@@ -5,11 +5,27 @@ on:
   pull_request:
 
 jobs:
+  init:
+    runs-on: ubuntu-latest
+    outputs:
+      addons: ${{ steps.addons.outputs.addons }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Every directory with a config.yaml is an add-on, as in the build workflow.
+      - name: Find add-ons
+        id: addons
+        run: |
+          addons=$(for config in */config.yaml; do dirname "$config"; done | jq -R . | jq -sc .)
+          echo "addons=$addons" >> "$GITHUB_OUTPUT"
+
   addon-lint:
+    needs: init
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        addon: [actual-budget, firefly-iii]
+        addon: ${{ fromJSON(needs.init.outputs.addons) }}
     steps:
       - uses: actions/checkout@v4
       - name: Run add-on linter

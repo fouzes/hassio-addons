@@ -1,5 +1,5 @@
 name: Actual Budget
-version: "0.1.1"
+version: "0.1.2"
 slug: actual_budget
 image: ghcr.io/fouzes/{arch}-addon-actual-budget
 description: Local-first personal finance and budgeting app
@@ -9,6 +9,8 @@ arch:
   - aarch64
 init: false
 startup: services
+backup: cold
+watchdog: "[PROTO:ssl]://[HOST]:[PORT:5006]/"
 ports:
   5006/tcp: 5006
 ports_description:

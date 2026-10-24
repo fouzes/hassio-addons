@@ -1,0 +1,63 @@
+#include <tunables/global>
+
+profile actual_budget flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+
+  # Capabilities: run.sh and Node.js run as root and only need to read the
+  # certificates and write the data directory.
+  capability chown,
+  capability dac_override,
+  capability fowner,
+  capability fsetid,
+  capability kill,
+  capability setgid,
+  capability setuid,
+
+  # Network: the web server listens on 5006 (HTTP or HTTPS) and the sync server
+  # makes outgoing requests. Raw and packet sockets are not needed.
+  network inet stream,
+  network inet6 stream,
+  network inet dgram,
+  network inet6 dgram,
+  network unix,
+  deny network raw,
+  deny network packet,
+
+  # Deny what an add-on never needs.
+  deny mount,
+  deny umount,
+  deny @{PROC}/sys/** w,
+  deny /sys/[^f]** wklx,
+  deny /sys/f[^s]** wklx,
+  deny /sys/firmware/** rwklx,
+
+  # Signals only within the profile; no debugging of other processes.
+  signal (send,receive) peer=actual_budget,
+  deny ptrace,
+
+  # The container filesystem: the upstream image keeps Node.js, the
+  # application and tini under these paths and executes them.
+  / r,
+  /** r,
+  /bin/** ix,
+  /sbin/** ix,
+  /usr/** ix,
+  /app/** r,
+
+  # Add-on data (options, budget files, server database) and the Home Assistant
+  # certificates, which are only read.
+  /data/** rwk,
+  /ssl/** r,
+
+  # Temporary files and process information needed by Node.js and tini.
+  /tmp/** rwk,
+  /run/** rwk,
+  /dev/null rw,
+  /dev/zero r,
+  /dev/urandom r,
+  /dev/stdout rw,
+  /dev/stderr rw,
+  /dev/pts/** rw,
+  @{PROC}/** r,
+  @{PROC}/[0-9]*/fd/** rw,
+}
