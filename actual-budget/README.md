@@ -10,7 +10,7 @@ Home Assistant.
 ## Features
 
 - Persistent storage of budget files in the add-on data
-- Optional HTTPS using your Home Assistant certificates
-- Web interface on port 5006
+- Sidebar entry through Home Assistant ingress
+- Optional web interface on port 5006, with HTTPS using your Home Assistant certificates
 
 See the **Documentation** tab for setup instructions.
