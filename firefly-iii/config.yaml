@@ -1,5 +1,5 @@
 name: Firefly III
-version: "0.3.1"
+version: "0.4.0"
 slug: firefly_iii
 image: ghcr.io/fouzes/{arch}-addon-firefly-iii
 description: Self-hosted personal finance manager

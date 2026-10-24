@@ -1,5 +1,5 @@
 # Upstream Firefly III release bundled with this add-on version.
-ARG FIREFLY_VERSION=6.2.21
+ARG FIREFLY_VERSION=6.7.9
 FROM fireflyiii/core:version-${FIREFLY_VERSION}
 
 # Upstream runs as an unprivileged user; root is needed to install packages
