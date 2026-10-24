@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        addon: [firefly-iii]
+        addon: [actual-budget, firefly-iii]
     steps:
       - uses: actions/checkout@v4
       - name: Run add-on linter

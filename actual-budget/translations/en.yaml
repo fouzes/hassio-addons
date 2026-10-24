@@ -1,0 +1,12 @@
+configuration:
+  ssl:
+    name: Enable HTTPS
+    description: Serve Actual Budget over HTTPS using the certificate files below. Required when you open it from another device than the Home Assistant host.
+  certfile:
+    name: Certificate file
+    description: Certificate file in the /ssl folder.
+  keyfile:
+    name: Private key file
+    description: Private key file in the /ssl folder.
+network:
+  5006/tcp: Actual Budget web interface
