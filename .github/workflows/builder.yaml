@@ -3,9 +3,9 @@ name: Build
 on:
   push:
     branches: [main]
-    paths: ["firefly-iii/**"]
+    paths: ["firefly-iii/**", ".github/workflows/builder.yaml"]
   pull_request:
-    paths: ["firefly-iii/**"]
+    paths: ["firefly-iii/**", ".github/workflows/builder.yaml"]
   workflow_dispatch:
 
 env:
