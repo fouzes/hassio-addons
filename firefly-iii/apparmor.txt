@@ -1,0 +1,80 @@
+#include <tunables/global>
+
+profile firefly_iii flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+
+  # Capabilities: run.sh and the s6 init run as root, chown /data and then
+  # drop to www-data; nginx and PHP-FPM drop privileges from their masters.
+  capability chown,
+  capability dac_override,
+  capability fowner,
+  capability fsetid,
+  capability kill,
+  capability net_bind_service,
+  capability setgid,
+  capability setuid,
+  capability sys_chroot,
+
+  # Network: nginx listens on 8080 for the ingress proxy; PHP-FPM talks to
+  # nginx over a local socket. Raw and packet sockets are not needed.
+  network inet stream,
+  network inet6 stream,
+  network inet dgram,
+  network inet6 dgram,
+  network unix,
+  deny network raw,
+  deny network packet,
+
+  # Deny what an add-on never needs.
+  deny mount,
+  deny umount,
+  deny @{PROC}/sys/** w,
+  deny /sys/[^f]** wklx,
+  deny /sys/f[^s]** wklx,
+  deny /sys/firmware/** rwklx,
+
+  # Allow signalling only within the profile (s6 supervision).
+  signal (send,receive) peer=firefly_iii,
+  deny ptrace,
+
+  # The container filesystem: the upstream image keeps the application, nginx,
+  # PHP and s6 under these paths and executes them all.
+  / r,
+  /** r,
+  /bin/** ix,
+  /sbin/** ix,
+  /usr/** ix,
+  /command/** ix,
+  /package/** ix,
+  /init ix,
+  /etc/s6-overlay/** rix,
+  /etc/cont-init.d/** rix,
+  /etc/cont-finish.d/** rix,
+  /etc/services.d/** rix,
+  /etc/s6-overlay/s6-rc.d/** rix,
+  /usr/local/bin/** ix,
+  /var/www/html/** rwk,
+
+  # Add-on data and config (options, SQLite database, uploads, app key).
+  /data/** rwk,
+  /config/** rwk,
+
+  # Runtime state for s6, nginx, PHP-FPM and the log FIFO created by run.sh.
+  /run/** rwk,
+  /var/run/** rwk,
+  /var/lib/nginx/** rwk,
+  /var/log/** rwk,
+  /var/cache/nginx/** rwk,
+  /tmp/** rwk,
+  /dev/null rw,
+  /dev/zero r,
+  /dev/urandom r,
+  /dev/stdout rw,
+  /dev/stderr rw,
+  /dev/pts/** rw,
+
+  # Process information needed by s6, nginx and PHP-FPM.
+  @{PROC}/** r,
+  @{PROC}/[0-9]*/fd/** rw,
+  @{PROC}/sys/kernel/random/uuid r,
+}

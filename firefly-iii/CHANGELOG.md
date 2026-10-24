@@ -44,6 +44,11 @@ independent of the Firefly III version it bundles.
 - Fix start-up failure `rm: cannot remove '/var/www/html/storage/upload': Device or resource busy`.
 - Start through the upstream `/init` (nginx + PHP-FPM) instead of a non-existent Apache command.
 
+## 0.1.3
+
+- Add Home Assistant ingress so Firefly III appears in the sidebar menu.
+- Fix start-up failure `rm: cannot remove '/var/www/html/storage/upload': Device or resource busy`.
+
 ## 0.1.2
 
 - Install from a prebuilt image on GitHub Container Registry instead of building on the device.
