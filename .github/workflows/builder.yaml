@@ -3,36 +3,63 @@ name: Build
 on:
   push:
     branches: [main]
-    paths: ["firefly-iii/**", ".github/workflows/builder.yaml"]
+    paths: ["*/**", "!.github/**", ".github/workflows/builder.yaml"]
   pull_request:
-    paths: ["firefly-iii/**", ".github/workflows/builder.yaml"]
+    paths: ["*/**", "!.github/**", ".github/workflows/builder.yaml"]
   workflow_dispatch:
-
-env:
-  ARCHITECTURES: '["amd64", "aarch64"]'
-  IMAGE_NAME: addon-firefly-iii
 
 jobs:
   init:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
-      version: ${{ steps.meta.outputs.version }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Read add-on version
-        id: meta
-        run: |
-          version=$(grep '^version:' firefly-iii/config.yaml | tr -d '"' | awk '{print $2}')
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-
+      # One build per add-on and architecture. Every add-on must set `image:`
+      # in its config.yaml so that Home Assistant pulls it instead of building
+      # it on the device; the image name is taken from there.
       - name: Prepare build matrix
         id: matrix
-        uses: home-assistant/builder/actions/prepare-multi-arch-matrix@2026.09.0
-        with:
-          architectures: ${{ env.ARCHITECTURES }}
-          image-name: ${{ env.IMAGE_NAME }}
+        run: |
+          include='[]'
+          for config in */config.yaml; do
+            dir=$(dirname "$config")
+            version=$(sed -n 's/^version: *"\{0,1\}\([^"]*\)"\{0,1\} *$/\1/p' "$config")
+            image=$(sed -n 's/^image: *"\{0,1\}\([^"]*\)"\{0,1\} *$/\1/p' "$config")
+            archs=$(awk '/^arch:/ {in_arch=1; next} in_arch && /^ *- / {print $2; next} {in_arch=0}' "$config")
+            if [ -z "$version" ] || [ -z "$archs" ]; then
+              echo "::error file=$config::Missing version or arch"
+              exit 1
+            fi
+            if [ -z "$image" ]; then
+              echo "::error file=$config::Missing image: add-ons must be published as prebuilt images"
+              exit 1
+            fi
+            case "$image" in
+              ghcr.io/${{ github.repository_owner }}/\{arch\}-*) ;;
+              *)
+                echo "::error file=$config::image must look like ghcr.io/${{ github.repository_owner }}/{arch}-<name>"
+                exit 1
+                ;;
+            esac
+            for arch in $archs; do
+              case "$arch" in
+                amd64) os=ubuntu-24.04 ;;
+                aarch64) os=ubuntu-24.04-arm ;;
+                *)
+                  echo "::error file=$config::Unsupported architecture $arch"
+                  exit 1
+                  ;;
+              esac
+              include=$(jq -c \
+                --arg addon "$dir" --arg version "$version" --arg arch "$arch" \
+                --arg os "$os" --arg image "${image//\{arch\}/$arch}" \
+                '. + [{addon: $addon, version: $version, arch: $arch, os: $os, image: $image}]' \
+                <<< "$include")
+            done
+          done
+          echo "matrix={\"include\":$include}" >> "$GITHUB_OUTPUT"
 
   build:
     needs: init
@@ -42,6 +69,7 @@ jobs:
       packages: write
       id-token: write
     strategy:
+      fail-fast: false
       matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
@@ -50,10 +78,11 @@ jobs:
         uses: home-assistant/builder/actions/build-image@2026.09.0
         with:
           arch: ${{ matrix.arch }}
-          context: firefly-iii
+          context: ${{ matrix.addon }}
+          cache-gha-scope: ${{ matrix.addon }}
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           image: ${{ matrix.image }}
-          image-tags: ${{ needs.init.outputs.version }}
+          image-tags: ${{ matrix.version }}
           push: ${{ github.event_name != 'pull_request' }}
-          skip-existing: ${{ needs.init.outputs.version }}
-          version: ${{ needs.init.outputs.version }}
+          skip-existing: ${{ matrix.version }}
+          version: ${{ matrix.version }}
