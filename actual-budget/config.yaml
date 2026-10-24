@@ -9,7 +9,6 @@ arch:
   - aarch64
 init: false
 ingress: true
-ingress_port: 8099
 panel_icon: mdi:cash-multiple
 panel_title: Actual Budget
 startup: services
@@ -18,7 +17,6 @@ ports:
   5006/tcp: 5006
 ports_description:
   5006/tcp: Actual Budget web interface
-webui: "[PROTO:ssl]://[HOST]:[PORT:5006]"
 map:
   - ssl:ro
 options:
