@@ -100,7 +100,7 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
           context: ${{ matrix.addon }}
-          cache-gha-scope: ${{ matrix.addon }}
+          cache-gha: false
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           image: ${{ matrix.image }}
           image-tags: ${{ matrix.version }}
