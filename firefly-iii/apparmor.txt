@@ -38,12 +38,13 @@ profile firefly_iii flags=(attach_disconnected,mediate_deleted) {
   deny ptrace,
 
   # The container filesystem: the upstream image keeps the application, nginx,
-  # PHP and s6 under these paths and executes them all.
-  / r,
+  # PHP and s6 under these paths and executes them all. PHP's shared memory
+  # (OPcache) is an unlinked file that AppArmor reports as "/".
+  / rwm,
   /** r,
   /bin/** ix,
   /sbin/** ix,
-  /usr/** ix,
+  /usr/** mix,
   /command/** ix,
   /package/** ix,
   /init ix,
@@ -60,7 +61,11 @@ profile firefly_iii flags=(attach_disconnected,mediate_deleted) {
   /config/** rwk,
 
   # Runtime state for s6, nginx, PHP-FPM and the log FIFO created by run.sh.
-  /run/** rwk,
+  /run/ rw,
+  /run/** rwkl,
+  /run/s6/** mix,
+  /run/s6-rc*/** mix,
+  /run/service/** mix,
   /var/run/** rwk,
   /var/lib/nginx/** rwk,
   /var/log/** rwk,
@@ -72,6 +77,7 @@ profile firefly_iii flags=(attach_disconnected,mediate_deleted) {
   /dev/stdout rw,
   /dev/stderr rw,
   /dev/pts/** rw,
+  /dev/tty rw,
 
   # Process information needed by s6, nginx and PHP-FPM.
   @{PROC}/** r,

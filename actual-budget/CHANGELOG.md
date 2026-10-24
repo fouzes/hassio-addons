@@ -3,6 +3,12 @@
 This add-on follows its own [semantic versioning](https://semver.org/),
 independent of the Actual Budget version it bundles.
 
+## 0.1.3
+
+- Fix start-up: the upstream image now ships `app.js` instead of
+  `build/app.js`, so the server could not be found.
+- Allow memory-mapping libraries and native modules in the AppArmor profile.
+
 ## 0.1.2
 
 - Add an icon, a logo and an AppArmor profile.

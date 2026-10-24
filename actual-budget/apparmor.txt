@@ -41,8 +41,8 @@ profile actual_budget flags=(attach_disconnected,mediate_deleted) {
   /** r,
   /bin/** ix,
   /sbin/** ix,
-  /usr/** ix,
-  /app/** r,
+  /usr/** mix,
+  /app/** mr,
 
   # Add-on data (options, budget files, server database) and the Home Assistant
   # certificates, which are only read.
