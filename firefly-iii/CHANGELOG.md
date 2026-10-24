@@ -11,7 +11,7 @@ independent of the Firefly III version it bundles.
   writes to `/etc/nginx` at start-up (which the AppArmor profile denied).
 - Turn off the upstream trusted-proxy handling and the IPv6 listeners.
 - Fix the AppArmor profile: allow memory-mapping libraries and PHP shared
-  memory, running the s6 init from `/run/s6` and writing to `/dev/tty`.
+  memory, running the s6 init and its services from `/run`, and writing to `/dev/tty`.
 
 ## 0.4.1
 
