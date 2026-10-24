@@ -6,7 +6,7 @@ independent of the Actual Budget version it bundles.
 ## 0.1.2
 
 - Add an icon, a logo and an AppArmor profile.
-- Add a watchdog so Home Assistant restarts the add-on if the web server stops
+- Add a container health check so Home Assistant sees when the web server stops
   responding.
 - Stop the add-on while a backup is taken so the budget files are consistent.
 

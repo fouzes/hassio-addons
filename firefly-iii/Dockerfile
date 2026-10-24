@@ -51,5 +51,10 @@ RUN sed -i "s#'root'   => storage_path('upload'),#'root'   => env('UPLOAD_PATH',
 COPY run.sh /usr/local/bin/addon-run.sh
 RUN chmod +x /usr/local/bin/addon-run.sh
 
+# Home Assistant shows the add-on as unhealthy when the web server stops
+# accepting connections.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD ["bash", "-c", "exec 3<>/dev/tcp/localhost/8080"]
+
 ENTRYPOINT ["/usr/local/bin/addon-run.sh"]
 CMD ["/init"]

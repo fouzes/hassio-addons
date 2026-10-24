@@ -10,7 +10,6 @@ arch:
 init: false
 startup: services
 backup: cold
-watchdog: "[PROTO:ssl]://[HOST]:[PORT:5006]/"
 ports:
   5006/tcp: 5006
 ports_description:
