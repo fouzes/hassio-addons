@@ -1,0 +1,25 @@
+name: Actual Budget
+version: "0.1.0"
+slug: actual_budget
+description: Local-first personal finance and budgeting app
+url: https://actualbudget.org/
+arch:
+  - amd64
+  - aarch64
+init: false
+startup: services
+ports:
+  5006/tcp: 5006
+ports_description:
+  5006/tcp: Actual Budget web interface
+webui: "[PROTO:ssl]://[HOST]:[PORT:5006]"
+map:
+  - ssl:ro
+options:
+  ssl: false
+  certfile: fullchain.pem
+  keyfile: privkey.pem
+schema:
+  ssl: bool
+  certfile: str
+  keyfile: str

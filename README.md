@@ -13,6 +13,7 @@ A collection of add-ons for [Home Assistant](https://www.home-assistant.io/).
 
 | Add-on | Description |
 | --- | --- |
+| [Actual Budget](actual-budget/README.md) | Local-first personal finance and budgeting app. |
 | [Firefly III](firefly-iii/README.md) | Self-hosted personal finance manager. |
 
 ## Versioning
