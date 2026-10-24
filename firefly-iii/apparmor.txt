@@ -43,7 +43,7 @@ profile firefly_iii flags=(attach_disconnected,mediate_deleted) {
   /** r,
   /bin/** ix,
   /sbin/** ix,
-  /usr/** ix,
+  /usr/** mix,
   /command/** ix,
   /package/** ix,
   /init ix,

@@ -3,6 +3,15 @@
 This add-on follows its own [semantic versioning](https://semver.org/),
 independent of the Firefly III version it bundles.
 
+## 0.4.2
+
+- Fix start-up on Firefly III 6.7.9: the pre-rendered nginx site kept an
+  unexpanded `${NGINX_HTTP_PORT}` and nginx refused to start. All upstream nginx
+  templates are now rendered when the image is built, so the add-on no longer
+  writes to `/etc/nginx` at start-up (which the AppArmor profile denied).
+- Turn off the upstream trusted-proxy handling and the IPv6 listeners.
+- Allow memory-mapping libraries in the AppArmor profile.
+
 ## 0.4.1
 
 - Stop the add-on while a backup is taken so the SQLite database is consistent.

@@ -3,9 +3,9 @@ name: Build
 on:
   push:
     branches: [main]
-    paths: ["*/**", "!.github/**", ".github/workflows/builder.yaml"]
+    paths: ["*/**", "!.github/**", ".github/workflows/builder.yaml", ".github/scripts/smoke-test.sh"]
   pull_request:
-    paths: ["*/**", "!.github/**", ".github/workflows/builder.yaml"]
+    paths: ["*/**", "!.github/**", ".github/workflows/builder.yaml", ".github/scripts/smoke-test.sh"]
   workflow_dispatch:
 
 jobs:
@@ -61,8 +61,29 @@ jobs:
           done
           echo "matrix={\"include\":$include}" >> "$GITHUB_OUTPUT"
 
-  build:
+  # Start every image the way the Supervisor would (options.json in /data, the
+  # AppArmor profile applied, the hassio network) and fail unless the web port
+  # answers. Publishing waits for this.
+  smoke-test:
     needs: init
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.init.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install test dependencies
+        run: sudo apt-get install -y --no-install-recommends apparmor python3-yaml
+
+      - name: Build image
+        run: docker build --tag addon-under-test "${{ matrix.addon }}"
+
+      - name: Start the add-on
+        run: .github/scripts/smoke-test.sh "${{ matrix.addon }}" addon-under-test
+
+  build:
+    needs: [init, smoke-test]
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read

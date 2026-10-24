@@ -10,15 +10,35 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends jq \
     && rm -rf /var/lib/apt/lists/*
 
-# Home Assistant ingress passes the URL prefix in X-Ingress-Path. Render the
-# upstream nginx site template ahead of time with the image defaults and add
-# X-Forwarded-Prefix (which Firefly III trusts) so generated links keep it.
-RUN sed -e 's#\$NGINX_WEBROOT#/var/www/html/public#' \
-        -e 's#\$NGINX_FASTCGI_BUFFERS#8 8k#' \
-        -e 's#\$NGINX_FASTCGI_BUFFER_SIZE#8k#' \
-        -e 's#\$PHP_MAX_EXECUTION_TIME#300#' \
-        /etc/nginx/site-opts.d/http.conf.template \
-        > /etc/nginx/site-opts.d/http.conf \
+# Upstream renders its nginx templates when the container starts, writing into
+# /etc/nginx as www-data, which fails under the add-on's AppArmor profile (and
+# is needless work on every start). Render them now exactly as the upstream
+# entrypoint does, with the image defaults, and keep the real-IP handling of
+# trusted proxies switched off: the upstream default trusts a client-supplied
+# CF-Connecting-IP header from private networks, which would let LAN clients
+# fake the ingress address checked below. Ingress connects over IPv4, so the
+# IPv6 listeners are dropped; nginx would not start on hosts without IPv6.
+ENV TRUSTED_PROXY=off
+RUN vars=$(env | grep -E '^(PHP_|NGINX_|SSL_|LOG_|APACHE_|HEALTHCHECK_PATH|TRUSTED_PROXY)' \
+        | cut -d= -f1 | awk '{printf "${%s},",$1}' | sed 's/,$//') \
+    && envsubst "$vars" < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf \
+    && envsubst "$vars" < /etc/nginx/site-opts.d/http.conf.template > /etc/nginx/site-opts.d/http.conf \
+    && envsubst "$vars" < /etc/nginx/site-opts.d/https.conf.template > /etc/nginx/site-opts.d/https.conf \
+    && envsubst "$vars" < /etc/nginx/sites-available/ssl-full.template > /etc/nginx/sites-available/ssl-full \
+    && sed -i '/listen \[::\]:/d' /etc/nginx/nginx.conf /etc/nginx/site-opts.d/http.conf \
+        /etc/nginx/site-opts.d/https.conf /etc/nginx/sites-available/ssl-full \
+    && ln -s /etc/nginx/sites-available/ssl-off /etc/nginx/conf.d/default.conf
+
+# Home Assistant ingress passes the URL prefix in X-Ingress-Path. Add
+# X-Forwarded-Prefix (which Firefly III trusts) to the rendered site so generated
+# links keep it, and only let the ingress proxy connect: the user it passes in
+# X-Remote-User-Name becomes the Firefly III user.
+RUN printf '%s\n' 'allow 172.30.32.2;' 'allow 127.0.0.1;' 'allow ::1;' 'deny all;' \
+        > /etc/nginx/addon-access.conf \
+    && printf '%s\n' \
+        'if ($http_x_remote_user_name = "") { return 403; }' \
+        'fastcgi_param REMOTE_USER "$http_x_remote_user_name@homeassistant.local";' \
+        > /etc/nginx/addon-auth.conf \
     && sed -i \
         -e '/server_name _;/a\    include /etc/nginx/addon-access.conf;' \
         -e '/fastcgi_read_timeout 300;/a\    fastcgi_param  HTTP_X_FORWARDED_PREFIX $http_x_ingress_path;' \
@@ -27,19 +47,7 @@ RUN sed -e 's#\$NGINX_WEBROOT#/var/www/html/public#' \
     && grep -q HTTP_X_FORWARDED_PREFIX /etc/nginx/site-opts.d/http.conf \
     && grep -q addon-access.conf /etc/nginx/site-opts.d/http.conf \
     && grep -q addon-auth.conf /etc/nginx/site-opts.d/http.conf \
-    && ! grep -q '\$[A-Z_]\+' /etc/nginx/site-opts.d/http.conf
-
-# Only the Home Assistant ingress proxy may connect, and the user it passes in
-# X-Remote-User-Name becomes the Firefly III user. The upstream real-IP config
-# trusts a client-supplied CF-Connecting-IP header from private networks, which
-# would let LAN clients fake the ingress address, so neutralise it.
-RUN printf '%s\n' 'allow 172.30.32.2;' 'allow 127.0.0.1;' 'allow ::1;' 'deny all;' \
-        > /etc/nginx/addon-access.conf \
-    && printf '%s\n' \
-        'if ($http_x_remote_user_name = "") { return 403; }' \
-        'fastcgi_param REMOTE_USER "$http_x_remote_user_name@homeassistant.local";' \
-        > /etc/nginx/addon-auth.conf \
-    && echo '# disabled by the Home Assistant add-on' > /etc/nginx/server-opts.d/remoteip.conf
+    && ! grep -q '\$[{A-Z_]' /etc/nginx/nginx.conf /etc/nginx/site-opts.d/http.conf
 
 # storage/upload is a VOLUME in the upstream image and cannot be replaced, so
 # let the upload disk root be configured and keep it under /data instead.

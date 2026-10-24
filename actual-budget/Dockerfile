@@ -17,4 +17,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
     CMD ["bash", "-c", "exec 3<>/dev/tcp/localhost/5006"]
 
 ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/usr/local/bin/addon-run.sh"]
-CMD ["node", "build/app.js"]
+CMD ["node", "app.js"]

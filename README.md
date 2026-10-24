@@ -37,6 +37,12 @@ Each add-on lives in its own directory containing `config.yaml`, a
 `apparmor.txt`. Pull requests that add new add-ons or improve existing ones are
 welcome.
 
+CI builds every add-on image and starts it before it is published, the way the
+Supervisor does: `options.json` in `/data`, the add-on's AppArmor profile applied
+and the web port probed through the ingress address. The check lives in
+`.github/scripts/smoke-test.sh` and runs on every pull request; it prints the
+container log and any AppArmor denials when an add-on does not start.
+
 ## License
 
 Released under the [MIT License](LICENSE).
