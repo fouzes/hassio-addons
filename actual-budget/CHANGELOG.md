@@ -3,6 +3,18 @@
 This add-on follows its own [semantic versioning](https://semver.org/),
 independent of the Actual Budget version it bundles.
 
+## 0.2.0
+
+- Add a sidebar entry through Home Assistant ingress. Actual Budget has no
+  base-path setting, so the web client is patched at image build time to resolve
+  its addresses against the page's `<base>` tag, and an nginx proxy on the
+  ingress port writes the ingress path into it. The build fails if an Actual
+  update changes the code the patch is written for.
+- Opening Actual Budget from the sidebar works over plain HTTP; it does not need
+  the `ssl` option. The service worker (offline use) is disabled, and the budget
+  should only be open in one browser tab at a time inside the sidebar.
+- The add-on port (`5006`) and the `ssl` option keep working as before.
+
 ## 0.1.3
 
 - Fix start-up: the upstream image now ships `app.js` instead of

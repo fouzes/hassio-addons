@@ -43,8 +43,8 @@ EOF
 SLUG=$(config slug)
 INGRESS=$(config ingress)
 INGRESS_PORT=$(config ingress_port)
-if [ "$INGRESS" = "True" ] && [ -n "$INGRESS_PORT" ]; then
-    PORT=$INGRESS_PORT
+if [ "$INGRESS" = "True" ]; then
+    PORT=${INGRESS_PORT:-8099}  # the Supervisor's default ingress port
 else
     PORT=$(config ports | head -n1 | cut -d/ -f1)
 fi

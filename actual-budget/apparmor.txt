@@ -3,8 +3,9 @@
 profile actual_budget flags=(attach_disconnected,mediate_deleted) {
   #include <abstractions/base>
 
-  # Capabilities: run.sh and Node.js run as root and only need to read the
-  # certificates and write the data directory.
+  # Capabilities: run.sh, Node.js and the nginx master run as root; they read
+  # the certificates, write the data directory, and nginx starts its workers
+  # as an unprivileged user.
   capability chown,
   capability dac_override,
   capability fowner,
@@ -13,8 +14,9 @@ profile actual_budget flags=(attach_disconnected,mediate_deleted) {
   capability setgid,
   capability setuid,
 
-  # Network: the web server listens on 5006 (HTTP or HTTPS) and the sync server
-  # makes outgoing requests. Raw and packet sockets are not needed.
+  # Network: the web server listens on 5006 (HTTP or HTTPS), nginx on 8099 for
+  # ingress, and the sync server makes outgoing requests. Raw and packet
+  # sockets are not needed.
   network inet stream,
   network inet6 stream,
   network inet dgram,
@@ -49,7 +51,12 @@ profile actual_budget flags=(attach_disconnected,mediate_deleted) {
   /data/** rwk,
   /ssl/** r,
 
-  # Temporary files and process information needed by Node.js and tini.
+  # nginx's own default log and temporary directories, which it opens at
+  # start-up even when the configuration points elsewhere.
+  /var/log/nginx/** rwk,
+  /var/lib/nginx/** rwk,
+
+  # Temporary files and process information needed by Node.js, nginx and tini.
   /tmp/** rwk,
   /run/** rwk,
   /dev/null rw,
